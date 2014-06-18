@@ -4,7 +4,6 @@ using System.Diagnostics;
 using System.Drawing;
 using System.Runtime.InteropServices;
 using System.Text;
-using System.Windows.Forms;
 
 namespace UtilN {
 
@@ -140,12 +139,12 @@ namespace UtilN {
 
         public static List<IntPtr> GetTasks() {
             List<IntPtr> hws = new List<IntPtr>();
-            EnumWindows(new wep((hw, lp) => {
+            EnumWindows((hw, lp) => {
                 if(IsWindowVisible(hw) && GetWindow(hw, GW_OWNER) == IntPtr.Zero &&
                     (GetWindowLong(hw, GWL_EXSTYLE) & WS_EX_TOOLWINDOW) == 0)
                     hws.Add(hw);
                 return true;
-            }), 0);
+            }, 0);
             return hws;
         }
 
@@ -174,25 +173,12 @@ namespace UtilN {
             ShowWindow(hw, SW_RESTORE);
         }
 
-        public static Redraw Suspend(Control c) {
-            return new Redraw(c);
+        public static void ResumeDraw(IntPtr hw) {
+            SendMessage(hw, WM_SETREDRAW, 1, 0);
         }
 
-        public class Redraw : IDisposable {
-
-            private readonly Control c;
-
-            public Redraw(Control c) {
-                this.c = c;
-                SendMessage(c.Handle, WM_SETREDRAW, 0, 0);
-                c.SuspendLayout();
-            }
-
-            public void Dispose() {
-                c.ResumeLayout();
-                SendMessage(c.Handle, WM_SETREDRAW, 1, 0);
-                c.Refresh();
-            }
+        public static void SuspendDraw(IntPtr hw) {
+            SendMessage(hw, WM_SETREDRAW, 0, 0);
         }
 
         public class Placement {
@@ -217,23 +203,15 @@ namespace UtilN {
         }
 
         [StructLayout(LayoutKind.Sequential)]
-        public struct POINT {
-            public int X, Y;
-        }
-
-        [StructLayout(LayoutKind.Sequential)]
-        public struct RECT {
+        private struct RECT {
             public int Left, Top, Right, Bottom;
         }
 
         [StructLayout(LayoutKind.Sequential)]
-        internal struct WINDOWPLACEMENT {
+        private struct WINDOWPLACEMENT {
             public int Length, Flags, ShowCmd;
-            public POINT MinPosition, MaxPosition;
+            public Point MinPosition, MaxPosition;
             public RECT NormalPosition;
-        }
-
-        private static void Main() {
         }
     }
 }

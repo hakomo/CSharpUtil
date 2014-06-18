@@ -7,7 +7,7 @@ namespace UtilN {
 
     public class Util {
 
-        private static Random r = new Random();
+        private static readonly Random r = new Random();
 
         public static void Add(Control c, Control d, int ix) {
             c.Controls.Add(d);
@@ -25,8 +25,8 @@ namespace UtilN {
             return l;
         }
 
-        public static MeasureTimer Mt(string s = "") {
-            return new MeasureTimer(s);
+        public static double Rand() {
+            return r.NextDouble();
         }
 
         public static int Rand(int n) {
@@ -37,32 +37,38 @@ namespace UtilN {
             return r.Next(m - n) + n;
         }
 
-        public static void Run(Action a) {
+        public static void Run<T>() where T : Form, new() {
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
-            a();
+            Application.Run(new T());
         }
 
-        public static void RunMutex(Action a, string s) {
+        public static void Run<T>(string s) where T : Form, new() {
+            Run<T>(s, delegate {
+                Process p = Process.GetCurrentProcess();
+                foreach(Process q in Process.GetProcessesByName(p.ProcessName)) {
+                    if(p.Id != q.Id)
+                        WinAPI.Activate(q.MainWindowHandle);
+                }
+            });
+        }
+
+        public static void Run<T>(string s, Action a) where T : Form, new() {
             using(Mutex m = new Mutex(false, s)) {
                 if(m.WaitOne(0, false)) {
-                    Run(a);
+                    Run<T>();
                 } else {
-                    Process p = Process.GetCurrentProcess();
-                    foreach(Process q in Process.GetProcessesByName(p.ProcessName)) {
-                        if(p.Id != q.Id)
-                            WinAPI.Activate(q.MainWindowHandle);
-                    }
+                    a();
                 }
-            }
+            }            
         }
 
-        public class MeasureTimer : IDisposable {
+        public class StopWatch : IDisposable {
 
             private readonly string s;
             private readonly Stopwatch sw = new Stopwatch();
 
-            public MeasureTimer(string s = "") {
+            public StopWatch(string s = "") {
                 this.s = s;
                 sw.Start();
             }
@@ -74,11 +80,11 @@ namespace UtilN {
         }
     }
 
-    public class Bit {
+    public class BIT {
 
         private readonly int[] a;
 
-        public Bit(int n) {
+        public BIT(int n) {
             a = new int[n];
         }
 
@@ -94,6 +100,31 @@ namespace UtilN {
                     sm += a[i];
                 return sm;
             }
+        }
+    }
+
+    public class RadioMenuItem : MenuItem {
+
+        public RadioMenuItem(string text, EventHandler onClick)
+            : base(text, onClick) {
+            RadioCheck = true;
+        }
+    }
+
+    public class Redraw : IDisposable {
+
+        private readonly Control c;
+
+        public Redraw(Control c) {
+            this.c = c;
+            WinAPI.SuspendDraw(c.Handle);
+            c.SuspendLayout();
+        }
+
+        public void Dispose() {
+            c.ResumeLayout();
+            WinAPI.ResumeDraw(c.Handle);
+            c.Refresh();
         }
     }
 
@@ -127,14 +158,6 @@ namespace UtilN {
                 a[j] = i;
                 b[i] += b[i] == b[j] ? 1 : 0;
             }
-        }
-    }
-
-    public class RadioMenuItem : MenuItem {
-
-        public RadioMenuItem(string text, EventHandler onClick)
-            : base(text, onClick) {
-            RadioCheck = true;
         }
     }
 }
