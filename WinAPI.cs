@@ -5,7 +5,7 @@ using System.Drawing;
 using System.Runtime.InteropServices;
 using System.Text;
 
-namespace UtilN {
+namespace Hakomo.Library {
 
     public class WinAPI {
 
@@ -183,32 +183,33 @@ namespace UtilN {
 
         public class Placement {
 
-            private readonly IntPtr hw, hwia;
+            public IntPtr HW;
+            public RECT Rect;
+            public WINDOWPLACEMENT WindowPlacement;
 
-            private RECT r;
-            private WINDOWPLACEMENT wp;
+            public Placement() {
+            }
 
             public Placement(IntPtr hw) {
-                this.hw = hw;
-                this.hwia = GetWindow(hw, GW_HWNDPREV);
-                GetWindowRect(hw, out r);
-                wp.Length = Marshal.SizeOf(typeof(WINDOWPLACEMENT));
-                GetWindowPlacement(hw, out wp);
+                this.HW = hw;
+                GetWindowRect(hw, out Rect);
+                WindowPlacement.Length = Marshal.SizeOf(typeof(WINDOWPLACEMENT));
+                GetWindowPlacement(hw, out WindowPlacement);
             }
 
             public void Restore() {
-                SetWindowPlacement(hw, ref wp);
-                SetWindowPos(hw, hwia, r.Left, r.Top, r.Right - r.Left, r.Bottom - r.Top, SWP_NOACTIVATE);
+                SetWindowPlacement(HW, ref WindowPlacement);
+                SetWindowPos(HW, IntPtr.Zero, Rect.Left, Rect.Top, Rect.Right - Rect.Left, Rect.Bottom - Rect.Top, SWP_NOACTIVATE);
             }
         }
 
         [StructLayout(LayoutKind.Sequential)]
-        private struct RECT {
+        public struct RECT {
             public int Left, Top, Right, Bottom;
         }
 
         [StructLayout(LayoutKind.Sequential)]
-        private struct WINDOWPLACEMENT {
+        public struct WINDOWPLACEMENT {
             public int Length, Flags, ShowCmd;
             public Point MinPosition, MaxPosition;
             public RECT NormalPosition;
