@@ -1,12 +1,14 @@
 ﻿using System.Drawing;
 using System.Runtime.InteropServices;
 
-namespace UtilN {
+namespace Hakomo.Library {
 
     public class Mouse {
 
         [DllImport("user32")]
         private static extern bool GetCursorPos(out Point p);
+        [DllImport("user32")]
+        private static extern short GetKeyState(int k);
         [DllImport("user32")]
         private static extern void mouse_event(int f, int x, int y, int d, int i);
         [DllImport("user32")]
@@ -14,7 +16,8 @@ namespace UtilN {
 
         private const int MOUSEEVENTF_LEFTDOWN = 2, MOUSEEVENTF_LEFTUP = 4,
             MOUSEEVENTF_RIGHTDOWN = 8, MOUSEEVENTF_RIGHTUP = 0x10,
-            MOUSEEVENTF_MIDDLEDOWN = 0x20, MOUSEEVENTF_MIDDLEUP = 0x40;
+            MOUSEEVENTF_MIDDLEDOWN = 0x20, MOUSEEVENTF_MIDDLEUP = 0x40,
+            VK_LBUTTON = 1, VK_RBUTTON = 2, VK_MBUTTON = 4;
 
         public static void Down() {
             mouse_event(MOUSEEVENTF_LEFTDOWN, 0, 0, 0, 0);
@@ -121,6 +124,24 @@ namespace UtilN {
             }
             set {
                 SetCursorPos(value.X, value.Y);
+            }
+        }
+
+        public static bool IsDown {
+            get {
+                return GetKeyState(VK_LBUTTON) < 0;
+            }
+        }
+
+        public static bool IsRightDown {
+            get {
+                return GetKeyState(VK_RBUTTON) < 0;
+            }
+        }
+
+        public static bool IsMiddleDown {
+            get {
+                return GetKeyState(VK_MBUTTON) < 0;
             }
         }
     }
