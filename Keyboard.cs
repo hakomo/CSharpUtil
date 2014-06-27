@@ -2,7 +2,7 @@
 using System.Runtime.InteropServices;
 using System.Windows.Forms;
 
-namespace UtilN {
+namespace Hakomo.Library {
 
     public class Keyboard {
 
