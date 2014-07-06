@@ -41,28 +41,26 @@ namespace Hakomo.Library {
             FormBorderStyle = FormBorderStyle.None;
         }
 
-        protected Bitmap LayeredBitmap {
-            set {
-                IntPtr hdcDst = IntPtr.Zero, hdcSrc = IntPtr.Zero, hbmpNew = IntPtr.Zero, hbmpOld = IntPtr.Zero;
-                try {
-                    hdcDst = GetDC(IntPtr.Zero);
-                    hdcSrc = CreateCompatibleDC(hdcDst);
-                    hbmpNew = value.GetHbitmap(Color.FromArgb(0));
-                    hbmpOld = SelectObject(hdcSrc, hbmpNew);
-                    Point pDst = Location, pSrc = new Point();
-                    Size = value.Size;
-                    Size s = Size;
-                    BLENDFUNCTION b = BLENDFUNCTION.Default;
-                    UpdateLayeredWindow(Handle, hdcDst, ref pDst, ref s, hdcSrc, ref pSrc, 0, ref b, 2);
-                } finally {
-                    if(hdcDst != IntPtr.Zero)
-                        ReleaseDC(IntPtr.Zero, hdcDst);
-                    if(hdcSrc != IntPtr.Zero)
-                        DeleteDC(hdcSrc);
-                    if(hbmpNew != IntPtr.Zero) {
-                        SelectObject(hdcSrc, hbmpOld);
-                        DeleteObject(hbmpNew);
-                    }
+        public void SetLayeredBitmap(Point location, Bitmap bmp) {
+            IntPtr hdcDst = IntPtr.Zero, hdcSrc = IntPtr.Zero, hbmpNew = IntPtr.Zero, hbmpOld = IntPtr.Zero;
+            try {
+                hdcDst = GetDC(IntPtr.Zero);
+                hdcSrc = CreateCompatibleDC(hdcDst);
+                hbmpNew = bmp.GetHbitmap(Color.FromArgb(0));
+                hbmpOld = SelectObject(hdcSrc, hbmpNew);
+                Bounds = new Rectangle(location, bmp.Size);
+                Point p = new Point();
+                Size s = bmp.Size;
+                BLENDFUNCTION b = BLENDFUNCTION.Default;
+                UpdateLayeredWindow(Handle, hdcDst, ref location, ref s, hdcSrc, ref p, 0, ref b, 2);
+            } finally {
+                if(hdcDst != IntPtr.Zero)
+                    ReleaseDC(IntPtr.Zero, hdcDst);
+                if(hdcSrc != IntPtr.Zero)
+                    DeleteDC(hdcSrc);
+                if(hbmpNew != IntPtr.Zero) {
+                    SelectObject(hdcSrc, hbmpOld);
+                    DeleteObject(hbmpNew);
                 }
             }
         }
