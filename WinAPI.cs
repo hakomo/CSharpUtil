@@ -25,6 +25,8 @@ namespace Hakomo.Library {
         [DllImport("user32")]
         private static extern IntPtr GetClassLong(IntPtr hw, int i);
         [DllImport("user32")]
+        private static extern int GetClassName(IntPtr hw, StringBuilder s, int mx);
+        [DllImport("user32")]
         public static extern IntPtr GetForegroundWindow();
         [DllImport("user32")]
         private static extern IntPtr GetWindow(IntPtr hw, int c);
@@ -118,6 +120,12 @@ namespace Hakomo.Library {
         public static string GetCaption(IntPtr hw) {
             StringBuilder sb = new StringBuilder(90);
             GetWindowText(hw, sb, sb.Capacity);
+            return sb.ToString();
+        }
+
+        public static string GetClassName(IntPtr hw) {
+            StringBuilder sb = new StringBuilder(900);
+            GetClassName(hw, sb, sb.Capacity);
             return sb.ToString();
         }
 
