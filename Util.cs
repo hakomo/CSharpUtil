@@ -104,4 +104,18 @@ namespace Hakomo.Library {
             c.Refresh();
         }
     }
+
+    public class TemporaryCurrentDirectory : IDisposable {
+
+        private readonly string path;
+
+        public TemporaryCurrentDirectory(string path) {
+            this.path = Environment.CurrentDirectory;
+            Environment.CurrentDirectory = path;
+        }
+
+        public void Dispose() {
+            Environment.CurrentDirectory = path;
+        }
+    }
 }
